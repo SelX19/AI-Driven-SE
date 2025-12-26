@@ -1,0 +1,40 @@
+# SQLAlchemy ORM models
+
+from sqlalchemy import Column, String, Text, ForeignKey, DateTime, CheckConstraint, Index
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from app.database import Base
+import uuid
+
+
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    
+    notes = relationship("Note", back_populates="user", cascade="all, delete-orphan")
+
+
+class Note(Base):
+    __tablename__ = "notes"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(255), nullable=False)
+    content = Column(Text, nullable=False, default="")
+    status = Column(String(20), nullable=False, default="active")
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    
+    user = relationship("User", back_populates="notes")
+    
+    __table_args__ = (
+        CheckConstraint("status IN ('active', 'archived')", name="check_status"),
+        Index("idx_notes_user_id", "user_id"),
+        Index("idx_notes_user_status", "user_id", "status"),
+        Index("idx_notes_created_at", "created_at"),
+    )

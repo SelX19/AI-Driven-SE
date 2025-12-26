@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen;
+    }
+}
+
+@layer components {
+    .sticky-note {
+        @apply relative p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200;
+        background: linear-gradient(135deg, var(--note-color) 0%, var(--note-color-light) 100%);
+    }
+
+    .sticky-note::before {
+        content: '';
+        @apply absolute top-0 right-0 w-0 h-0;
+        border-style: solid;
+        border-width: 0 20px 20px 0;
+        border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent;
+    }
+}
