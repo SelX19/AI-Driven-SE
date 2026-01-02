@@ -28,7 +28,12 @@ npm run build
 ```
 
 Built files will be in the `dist/` directory.
-````
+
+### Run the frontend tests
+```bash
+npx vitest run       # unit & integration tests
+npx playwright test  # e2e tests
+```
 
 ---
 

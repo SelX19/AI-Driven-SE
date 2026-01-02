@@ -47,3 +47,14 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 The API will be available at:
 - API: http://localhost:8000
 - Interactive docs: http://localhost:8000/docs
+
+### 5. Activate postgreSQL MCP server
+
+Before starting CLI with 'gemini' command, set up the db credentials (not storing for security):
+
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_DATABASE=notes_app
+export POSTGRES_USER=selmadjozic
+export POSTGRES_PASSWORD=replacewithown
+
