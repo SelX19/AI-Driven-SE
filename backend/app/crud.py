@@ -56,6 +56,7 @@ def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.
         user_id=user_id,
         title=note.title,
         content=note.content,
+        tags=note.tags,
         status="active"
     )
     db.add(db_note)
@@ -81,6 +82,9 @@ def update_note(
     
     if note_update.content is not None:
         db_note.content = note_update.content
+    
+    if note_update.tags is not None:
+        db_note.tags = note_update.tags
     
     db.commit()
     db.refresh(db_note)

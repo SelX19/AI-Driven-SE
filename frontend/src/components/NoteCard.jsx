@@ -48,6 +48,21 @@ export default function NoteCard({ note }) {
                 <p className="text-gray-700 text-sm flex-1 overflow-hidden">
                     {truncateContent(note.content)}
                 </p>
+
+                {note.tags && (
+                    <div className="mt-4">
+                        <div className="flex flex-wrap gap-2">
+                            {note.tags.split(',').slice(0, 2).map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="bg-gray-800/10 px-2 py-1 rounded-full text-xs"
+                                >
+                                    {tag.trim()}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="mt-4 pt-3 border-t border-gray-400/20">

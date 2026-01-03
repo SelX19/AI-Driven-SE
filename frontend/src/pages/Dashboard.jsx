@@ -22,6 +22,7 @@ export default function Dashboard() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
+    const [newNoteTags, setNewNoteTags] = useState('');
     const [creating, setCreating] = useState(false);
     const { showError, showSuccess } = useNotification();
 
@@ -49,9 +50,14 @@ export default function Dashboard() {
 
         setCreating(true);
         try {
-            await api.createNote(user.id, newNoteTitle, newNoteContent);
+            await api.createNote(user.id, {
+                title: newNoteTitle,
+                content: newNoteContent,
+                tags: newNoteTags,
+            });
             setNewNoteTitle('');
             setNewNoteContent('');
+            setNewNoteTags('');
             setShowCreateModal(false);
             loadNotes();
             showSuccess('Note created successfully!');
@@ -198,6 +204,20 @@ export default function Dashboard() {
                                     rows={6}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
                                     placeholder="Enter note content..."
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Tags (comma-separated)
+                                </label>
+                                <input
+                                    id="tags"
+                                    type="text"
+                                    value={newNoteTags}
+                                    onChange={(e) => setNewNoteTags(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                    placeholder="e.g., work, personal, important"
                                 />
                             </div>
 

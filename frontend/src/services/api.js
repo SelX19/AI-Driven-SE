@@ -61,12 +61,12 @@ class ApiService {
         return response.json();
     }
 
-    async createNote(userId, title, content = '') {
+    async createNote(userId, note) {
         const params = new URLSearchParams({ user_id: userId });
         const response = await fetch(`${API_BASE_URL}/notes/?${params}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, content })
+            body: JSON.stringify(note)
         });
 
         if (!response.ok) {
