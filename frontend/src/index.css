@@ -21,4 +21,28 @@
         border-width: 0 20px 20px 0;
         border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent;
     }
+
+    .notification-confirm-wrapper {
+        @apply bg-white p-4 rounded-lg shadow-lg flex flex-col items-center;
+    }
+
+    .notification-confirm-message {
+        @apply text-gray-800 mb-4 text-center;
+    }
+
+    .notification-confirm-buttons {
+        @apply flex space-x-2;
+    }
+
+    .notification-confirm-button {
+        @apply px-4 py-2 rounded;
+    }
+
+    .notification-confirm-button-confirm {
+        @apply bg-red-500 text-white hover:bg-red-600;
+    }
+
+    .notification-confirm-button-cancel {
+        @apply bg-gray-300 text-gray-800 hover:bg-gray-400;
+    }
 }

@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { useNotification } from '../context/NotificationContext';
 
 export default function NoteDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { showError, showSuccess, showConfirmation } = useNotification();
 
     const [note, setNote] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ export default function NoteDetail() {
             setEditedContent(data.content);
         } catch (error) {
             console.error('Failed to load note:', error);
-            alert('Failed to load note');
+            showError('Failed to load note');
             navigate('/dashboard');
         } finally {
             setLoading(false);
@@ -38,7 +40,10 @@ export default function NoteDetail() {
     };
 
     const handleSave = async () => {
-        if (!editedTitle.trim()) return;
+        if (!editedTitle.trim()) {
+            showError('Note title cannot be empty.');
+            return;
+        }
 
         setSaving(true);
         try {
@@ -48,9 +53,10 @@ export default function NoteDetail() {
             });
             setNote(updated);
             setEditing(false);
+            showSuccess('Changes saved successfully!');
         } catch (error) {
             console.error('Failed to save note:', error);
-            alert('Failed to save changes');
+            showError('Failed to save changes');
         } finally {
             setSaving(false);
         }
@@ -60,19 +66,23 @@ export default function NoteDetail() {
         const newStatus = note.status === 'active' ? 'archived' : 'active';
         const action = newStatus === 'archived' ? 'archive' : 'unarchive';
 
-        if (!confirm(`Are you sure you want to ${action} this note?`)) {
-            return;
-        }
-
-        try {
-            await api.updateNoteStatus(id, user.id, newStatus);
-            navigate('/dashboard');
-        } catch (error) {
-            console.error(`Failed to ${action} note:`, error);
-            alert(`Failed to ${action} note`);
-        }
+        showConfirmation(
+            `Are you sure you want to ${action} this note?`,
+            async () => {
+                try {
+                    await api.updateNoteStatus(id, user.id, newStatus);
+                    showSuccess(`Note ${action}d successfully!`);
+                    navigate('/dashboard');
+                } catch (error) {
+                    console.error(`Failed to ${action} note:`, error);
+                    showError(`Failed to ${action} note`);
+                }
+            },
+            () => {
+                // User cancelled, do nothing
+            }
+        );
     };
-
     const handleCancel = () => {
         setEditedTitle(note.title);
         setEditedContent(note.content);

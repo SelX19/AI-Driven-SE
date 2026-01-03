@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import NoteCard from '../components/NoteCard';
+import { useNotification } from '../context/NotificationContext';
 
 const TABS = [
     { id: 'all', label: 'All', status: null },
@@ -22,6 +23,7 @@ export default function Dashboard() {
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
     const [creating, setCreating] = useState(false);
+    const { showError, showSuccess } = useNotification();
 
     const currentTabStatus = TABS.find(tab => tab.id === activeTab)?.status;
 
@@ -52,9 +54,10 @@ export default function Dashboard() {
             setNewNoteContent('');
             setShowCreateModal(false);
             loadNotes();
+            showSuccess('Note created successfully!');
         } catch (error) {
             console.error('Failed to create note:', error);
-            alert('Failed to create note');
+            showError('Failed to create note');
         } finally {
             setCreating(false);
         }
