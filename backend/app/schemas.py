@@ -25,11 +25,13 @@ class UserResponse(BaseModel):
 class NoteCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
     content: str = Field(default="")
+    tags: str = Field(default="")
 
 
 class NoteUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=255)
     content: str | None = None
+    tags: str | None = None
 
 
 class NoteStatusUpdate(BaseModel):
@@ -41,6 +43,7 @@ class NoteResponse(BaseModel):
     user_id: UUID
     title: str
     content: str
+    tags: str
     status: Literal["active", "archived"]
     created_at: datetime
     updated_at: datetime

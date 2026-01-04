@@ -17,6 +17,7 @@ export default function NoteDetail() {
     const [editing, setEditing] = useState(false);
     const [editedTitle, setEditedTitle] = useState('');
     const [editedContent, setEditedContent] = useState('');
+    const [editedTags, setEditedTags] = useState('');
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
@@ -30,6 +31,7 @@ export default function NoteDetail() {
             setNote(data);
             setEditedTitle(data.title);
             setEditedContent(data.content);
+            setEditedTags(data.tags || '');
         } catch (error) {
             console.error('Failed to load note:', error);
             showError('Failed to load note');
@@ -50,6 +52,7 @@ export default function NoteDetail() {
             const updated = await api.updateNote(id, user.id, {
                 title: editedTitle,
                 content: editedContent,
+                tags: editedTags,
             });
             setNote(updated);
             setEditing(false);
@@ -86,6 +89,7 @@ export default function NoteDetail() {
     const handleCancel = () => {
         setEditedTitle(note.title);
         setEditedContent(note.content);
+        setEditedTags(note.tags || '');
         setEditing(false);
     };
 
@@ -207,6 +211,38 @@ export default function NoteDetail() {
                         <div className="text-gray-700 whitespace-pre-wrap mb-8 min-h-[200px]">
                             {note.content || <span className="text-gray-400 italic">No content</span>}
                         </div>
+                    )}
+
+                    {/* Tags */}
+                    {editing ? (
+                        <div className="mb-6">
+                            <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
+                                Tags (comma-separated)
+                            </label>
+                            <input
+                                id="tags"
+                                type="text"
+                                value={editedTags}
+                                onChange={(e) => setEditedTags(e.target.value)}
+                                className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                placeholder="e.g., work, personal, important"
+                            />
+                        </div>
+                    ) : (
+                        note.tags && (
+                            <div className="mb-8">
+                                <div className="flex flex-wrap gap-2">
+                                    {note.tags.split(',').map((tag) => (
+                                        <span
+                                            key={tag}
+                                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+                                        >
+                                            {tag.trim()}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )
                     )}
 
                     {/* Metadata */}
