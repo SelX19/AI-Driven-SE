@@ -13,4 +13,6 @@ dist/
 .gemini/
 gha-creds-*.json
 
-gemini-runner/node_modules/
+# Node dependencies
+node_modules/
+
