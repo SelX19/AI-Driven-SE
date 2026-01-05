@@ -80,7 +80,7 @@ export default function Dashboard() {
 
     const handleToggleFavorite = async (noteId, isFavorite) => {
         const originalNotes = [...notes];
-        const updatedNotes = notes.map(n => 
+        const updatedNotes = notes.map(n =>
             n.id === noteId ? { ...n, is_favorite: isFavorite } : n
         );
         setNotes(updatedNotes);
@@ -113,12 +113,12 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen flex">
+        <div className="min-h-screen">
             {/* Sidebar */}
-            <Sidebar 
-                isOpen={isSidebarOpen} 
-                toggleSidebar={toggleSidebar} 
-                onSelectFilter={handleSelectFilter} 
+            <Sidebar
+                isOpen={isSidebarOpen}
+                toggleSidebar={toggleSidebar}
+                onSelectFilter={handleSelectFilter}
             />
 
             <div className="flex-1 flex flex-col">
@@ -127,9 +127,9 @@ export default function Dashboard() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
-                                <button 
-                                    onClick={toggleSidebar} 
-                                    className="text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 mr-4 lg:hidden"
+                                <button
+                                    onClick={toggleSidebar}
+                                    className="text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 mr-4"
                                 >
                                     <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -302,101 +302,6 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
-        </div>
-    );
-}
-
-            {/* Floating Action Button */}
-            {activeTab !== 'archived' && (
-                <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-16 h-16 rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center text-3xl"
-                    aria-label="Create new note"
-                >
-                    +
-                </button>
-            )}
-
-            {/* Create Note Modal */}
-            {showCreateModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-900">Create New Note</h2>
-                            <button
-                                onClick={() => setShowCreateModal(false)}
-                                className="text-gray-400 hover:text-gray-600 text-2xl"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleCreateNote} className="space-y-4">
-                            <div>
-                                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Title
-                                </label>
-                                <input
-                                    id="title"
-                                    type="text"
-                                    value={newNoteTitle}
-                                    onChange={(e) => setNewNoteTitle(e.target.value)}
-                                    required
-                                    maxLength={255}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                    placeholder="Enter note title..."
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Content
-                                </label>
-                                <textarea
-                                    id="content"
-                                    value={newNoteContent}
-                                    onChange={(e) => setNewNoteContent(e.target.value)}
-                                    rows={6}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-                                    placeholder="Enter note content..."
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Tags (comma-separated)
-                                </label>
-                                <input
-                                    id="tags"
-                                    type="text"
-                                    value={newNoteTags}
-                                    onChange={(e) => setNewNoteTags(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                    placeholder="e.g., work, personal, important"
-                                />
-                            </div>
-
-                            <div className="flex space-x-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowCreateModal(false)}
-                                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={creating || !newNoteTitle.trim()}
-                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-medium transition disabled:bg-blue-300 disabled:cursor-not-allowed"
-                                >
-                                    {creating ? 'Creating...' : 'Create Note'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
