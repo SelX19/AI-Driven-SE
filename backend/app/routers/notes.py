@@ -323,7 +323,37 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
     @router.get("/recent/", response_model=List[schemas.NoteResponse])
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -335,7 +365,31 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         user_id: UUID = Query(..., description="User ID"),
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -347,13 +401,49 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
     ):
 
 
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         """
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -365,7 +455,31 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         """
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -377,7 +491,31 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         if not user:
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -389,7 +527,31 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
                 status_code=status.HTTP_404_NOT_FOUND,
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -401,7 +563,31 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
             )
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
 
     
@@ -413,11 +599,53 @@ def get_favorite_notes(
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         notes = crud.get_recent_notes_by_user(db, user_id=user_id)
 
 
     
 
 
+    
+
+
+    
+
+
+    
+
+
+    
+
+
         return notes
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
 
