@@ -1,6 +1,7 @@
 // Sticky note card component
 
 import { useNavigate } from 'react-router-dom';
+import FavoriteIcon from './FavoriteIcon';
 
 const NOTE_COLORS = [
     { bg: '#fef3c7', light: '#fefce8' }, // yellow
@@ -10,7 +11,7 @@ const NOTE_COLORS = [
     { bg: '#e9d5ff', light: '#f3e8ff' }, // purple
 ];
 
-export default function NoteCard({ note }) {
+export default function NoteCard({ note, onToggleFavorite }) {
     const navigate = useNavigate();
 
     // Deterministic color based on note ID
@@ -31,6 +32,11 @@ export default function NoteCard({ note }) {
         });
     };
 
+    const handleFavoriteClick = (e) => {
+        e.stopPropagation();
+        onToggleFavorite(note.id, !note.is_favorite);
+    };
+
     return (
         <div
             onClick={() => navigate(`/note/${note.id}`)}
@@ -40,6 +46,9 @@ export default function NoteCard({ note }) {
                 '--note-color-light': colors.light,
             }}
         >
+            <div className="absolute top-2 right-2 z-10">
+                <FavoriteIcon isFavorite={note.is_favorite} onClick={handleFavoriteClick} />
+            </div>
             <div className="flex-1 flex flex-col">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2">
                     {note.title}
