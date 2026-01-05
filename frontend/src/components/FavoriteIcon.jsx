@@ -6,14 +6,10 @@ const FavoriteIcon = ({ isFavorite, onClick }) => {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       className="h-6 w-6 text-red-500"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
       fill="currentColor"
     >
-      <path
-        fillRule="evenodd"
-        d="M10 18a.75.75 0 01-.75-.75V7.617l-1.47 1.47a.75.75 0 01-1.06-1.06l3-3a.75.75 0 011.06 0l3 3a.75.75 0 01-1.06 1.06l-1.47-1.47V17.25A.75.75 0 0110 18z"
-        clipRule="evenodd"
-      />
+      <path d="M11.645 20.917 3.03 12.302a1.5 1.5 0 0 1 0-2.121l1.414-1.414a1.5 1.5 0 0 1 2.121 0L12 14.012l5.434-5.435a1.5 1.5 0 0 1 2.121 0l1.414 1.414a1.5 1.5 0 0 1 0 2.121l-8.615 8.615a1.5 1.5 0 0 1-2.121 0Z" />
     </svg>
   ) : (
     <svg
