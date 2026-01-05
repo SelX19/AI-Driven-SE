@@ -293,8 +293,131 @@ def get_favorite_notes(
     
 
 
-    notes = crud.get_notes_by_user(db, user_id=user_id, is_favorite=True)
+        
 
 
-    return notes
+    
+
+
+        notes = crud.get_notes_by_user(db, user_id=user_id, is_favorite=True)
+
+
+    
+
+
+        return notes
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    @router.get("/recent/", response_model=List[schemas.NoteResponse])
+
+
+    
+
+
+    def get_recent_notes(
+
+
+    
+
+
+        user_id: UUID = Query(..., description="User ID"),
+
+
+    
+
+
+        db: Session = Depends(get_db)
+
+
+    
+
+
+    ):
+
+
+    
+
+
+        """
+
+
+    
+
+
+        Get all recent notes for a user (created or updated in the last 24 hours).
+
+
+    
+
+
+        """
+
+
+    
+
+
+        user = crud.get_user_by_id(db, user_id)
+
+
+    
+
+
+        if not user:
+
+
+    
+
+
+            raise HTTPException(
+
+
+    
+
+
+                status_code=status.HTTP_404_NOT_FOUND,
+
+
+    
+
+
+                detail="User not found"
+
+
+    
+
+
+            )
+
+
+    
+
+
+        
+
+
+    
+
+
+        notes = crud.get_recent_notes_by_user(db, user_id=user_id)
+
+
+    
+
+
+        return notes
 
