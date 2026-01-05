@@ -1,10 +1,11 @@
 # Database operations
 
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, or_, func
 from app import models, schemas
 from uuid import UUID
 from typing import List, Optional
+from datetime import datetime, timedelta, timezone
 
 
 # User CRUD
@@ -52,6 +53,22 @@ def get_notes_by_user(
         query = query.filter(models.Note.is_favorite == is_favorite)
     
     return query.order_by(desc(models.Note.created_at)).all()
+
+
+def get_recent_notes_by_user(db: Session, user_id: UUID) -> List[models.Note]:
+    """Get notes for a user that were created or updated in the last 24 hours."""
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    
+    query = db.query(models.Note).filter(
+        models.Note.user_id == user_id,
+        or_(
+            models.Note.created_at >= twenty_four_hours_ago,
+            models.Note.updated_at >= twenty_four_hours_ago
+        )
+    )
+    
+    return query.order_by(desc(models.Note.created_at)).all()
+
 
 
 def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.Note:

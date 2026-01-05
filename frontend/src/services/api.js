@@ -131,6 +131,17 @@ class ApiService {
 
         return response.json();
     }
+
+    async getRecentNotes(userId) {
+        const params = new URLSearchParams({ user_id: userId });
+        const response = await fetch(`${API_BASE_URL}/notes/recent/?${params}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch recent notes');
+        }
+
+        return response.json();
+    }
 }
 
 export default new ApiService();

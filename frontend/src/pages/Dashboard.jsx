@@ -41,6 +41,8 @@ export default function Dashboard() {
             let data;
             if (filterType === 'favorites') {
                 data = await api.getFavoriteNotes(user.id);
+            } else if (filterType === 'recent') {
+                data = await api.getRecentNotes(user.id);
             } else {
                 data = await api.getNotes(user.id, currentTabStatus);
             }
@@ -106,9 +108,8 @@ export default function Dashboard() {
 
     const handleSelectFilter = (filter) => {
         setFilterType(filter);
-        // Reset activeTab if we are going to favorites, as tabs are for status, not filter type
-        if (filter === 'favorites') {
-            setActiveTab('all'); // Or any other default tab you prefer when showing favorites
+        if (filter === 'favorites' || filter === 'recent') {
+            setActiveTab('all');
         }
     };
 
@@ -150,8 +151,8 @@ export default function Dashboard() {
                     </div>
                 </header>
 
-                {/* Tabs - only show if not in favorites filter */}
-                {filterType !== 'favorites' && (
+                {/* Tabs - only show if not in favorites or recent filter */}
+                {filterType !== 'favorites' && filterType !== 'recent' && (
                     <div className="bg-white border-b border-gray-200">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <nav className="flex space-x-8" aria-label="Tabs">
@@ -188,11 +189,13 @@ export default function Dashboard() {
                             <p className="text-gray-600 mb-6">
                                 {filterType === 'favorites'
                                     ? "You haven't favorited any notes yet."
+                                    : filterType === 'recent'
+                                    ? "You don't have any notes that were created or updated today."
                                     : activeTab === 'archived'
                                         ? "You haven't archived any notes yet."
                                         : "Create your first note to get started!"}
                             </p>
-                            {activeTab !== 'archived' && filterType !== 'favorites' && (
+                            {activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
                                 <button
                                     onClick={() => setShowCreateModal(true)}
                                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition"
@@ -211,7 +214,7 @@ export default function Dashboard() {
                 </main>
 
                 {/* Floating Action Button */}
-                {activeTab !== 'archived' && filterType !== 'favorites' && (
+                {activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
                     <button
                         onClick={() => setShowCreateModal(true)}
                         className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-16 h-16 rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center text-3xl"
