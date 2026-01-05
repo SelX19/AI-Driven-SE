@@ -5,7 +5,7 @@ from sqlalchemy import desc, or_
 from app import models, schemas
 from uuid import UUID
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 # User CRUD
@@ -57,7 +57,7 @@ def get_notes_by_user(
 
 def get_recent_notes_by_user(db: Session, user_id: UUID) -> List[models.Note]:
     """Get notes for a user that were created or updated in the last 24 hours."""
-    twenty_four_hours_ago = datetime.utcnow() - timedelta(days=1)
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
     
     query = db.query(models.Note).filter(
         models.Note.user_id == user_id,
