@@ -39,13 +39,17 @@ def get_note_by_id(db: Session, note_id: UUID, user_id: UUID) -> Optional[models
 def get_notes_by_user(
     db: Session, 
     user_id: UUID, 
-    status: Optional[str] = None
+    status: Optional[str] = None,
+    is_favorite: Optional[bool] = None
 ) -> List[models.Note]:
-    """Get all notes for a user, optionally filtered by status"""
+    """Get all notes for a user, optionally filtered by status and favorite"""
     query = db.query(models.Note).filter(models.Note.user_id == user_id)
     
     if status:
         query = query.filter(models.Note.status == status)
+    
+    if is_favorite is not None:
+        query = query.filter(models.Note.is_favorite == is_favorite)
     
     return query.order_by(desc(models.Note.created_at)).all()
 
@@ -57,6 +61,7 @@ def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.
         title=note.title,
         content=note.content,
         tags=note.tags,
+        is_favorite=note.is_favorite,
         status="active"
     )
     db.add(db_note)
@@ -77,14 +82,9 @@ def update_note(
     if not db_note:
         return None
     
-    if note_update.title is not None:
-        db_note.title = note_update.title
-    
-    if note_update.content is not None:
-        db_note.content = note_update.content
-    
-    if note_update.tags is not None:
-        db_note.tags = note_update.tags
+    update_data = note_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_note, key, value)
     
     db.commit()
     db.refresh(db_note)

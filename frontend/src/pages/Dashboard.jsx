@@ -69,6 +69,23 @@ export default function Dashboard() {
         }
     };
 
+    const handleToggleFavorite = async (noteId, isFavorite) => {
+        const originalNotes = [...notes];
+        const updatedNotes = notes.map(n => 
+            n.id === noteId ? { ...n, is_favorite: isFavorite } : n
+        );
+        setNotes(updatedNotes);
+
+        try {
+            await api.toggleFavoriteStatus(noteId, user.id, isFavorite);
+            showSuccess(`Note ${isFavorite ? 'added to' : 'removed from'} favorites!`);
+        } catch (error) {
+            console.error('Failed to update favorite status:', error);
+            showError('Failed to update favorite status');
+            setNotes(originalNotes);
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/');
@@ -144,7 +161,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {notes.map((note) => (
-                            <NoteCard key={note.id} note={note} />
+                            <NoteCard key={note.id} note={note} onToggleFavorite={handleToggleFavorite} />
                         ))}
                     </div>
                 )}

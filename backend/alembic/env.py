@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from app.database import Base
+from app.models import User, Note
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -53,6 +54,8 @@ def run_migrations_offline():
         context.run_migrations()
 
 
+from dotenv import load_dotenv
+load_dotenv()
 import os
 # ...
 # ...

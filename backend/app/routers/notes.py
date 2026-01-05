@@ -101,27 +101,200 @@ def update_note(
     return updated_note
 
 
+
+
+
 @router.patch("/{note_id}/status", response_model=schemas.NoteResponse)
+
+
 def update_note_status(
+
+
     note_id: UUID,
+
+
     status_update: schemas.NoteStatusUpdate,
+
+
     user_id: UUID = Query(..., description="User ID"),
+
+
     db: Session = Depends(get_db)
+
+
 ):
+
+
     """
+
+
     Update note status (archive/unarchive).
+
+
     """
+
+
     updated_note = crud.update_note_status(
+
+
         db, 
+
+
         note_id=note_id, 
+
+
         user_id=user_id, 
+
+
         status=status_update.status
+
+
     )
+
+
     
+
+
     if not updated_note:
+
+
         raise HTTPException(
+
+
             status_code=status.HTTP_404_NOT_FOUND,
+
+
             detail="Note not found"
+
+
         )
+
+
     
+
+
     return updated_note
+
+
+
+
+
+
+
+
+@router.patch("/{note_id}/favorite", response_model=schemas.NoteResponse)
+
+
+def toggle_favorite_note(
+
+
+    note_id: UUID,
+
+
+    favorite_update: schemas.NoteFavoriteUpdate,
+
+
+    user_id: UUID = Query(..., description="User ID"),
+
+
+    db: Session = Depends(get_db)
+
+
+):
+
+
+    """
+
+
+    Update note's favorite status.
+
+
+    """
+
+
+    note_update_schema = schemas.NoteUpdate(is_favorite=favorite_update.is_favorite)
+
+
+    updated_note = crud.update_note(db, note_id=note_id, user_id=user_id, note_update=note_update_schema)
+
+
+    
+
+
+    if not updated_note:
+
+
+        raise HTTPException(
+
+
+            status_code=status.HTTP_404_NOT_FOUND,
+
+
+            detail="Note not found"
+
+
+        )
+
+
+    
+
+
+    return updated_note
+
+
+
+
+
+
+
+
+@router.get("/favorites/", response_model=List[schemas.NoteResponse])
+
+
+def get_favorite_notes(
+
+
+    user_id: UUID = Query(..., description="User ID"),
+
+
+    db: Session = Depends(get_db)
+
+
+):
+
+
+    """
+
+
+    Get all favorite notes for a user.
+
+
+    """
+
+
+    user = crud.get_user_by_id(db, user_id)
+
+
+    if not user:
+
+
+        raise HTTPException(
+
+
+            status_code=status.HTTP_404_NOT_FOUND,
+
+
+            detail="User not found"
+
+
+        )
+
+
+    
+
+
+    notes = crud.get_notes_by_user(db, user_id=user_id, is_favorite=True)
+
+
+    return notes
+

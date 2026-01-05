@@ -105,6 +105,32 @@ class ApiService {
 
         return response.json();
     }
+
+    async toggleFavoriteStatus(noteId, userId, isFavorite) {
+        const params = new URLSearchParams({ user_id: userId });
+        const response = await fetch(`${API_BASE_URL}/notes/${noteId}/favorite?${params}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_favorite: isFavorite })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update favorite status');
+        }
+
+        return response.json();
+    }
+
+    async getFavoriteNotes(userId) {
+        const params = new URLSearchParams({ user_id: userId });
+        const response = await fetch(`${API_BASE_URL}/notes/favorites/?${params}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch favorite notes');
+        }
+
+        return response.json();
+    }
 }
 
 export default new ApiService();
