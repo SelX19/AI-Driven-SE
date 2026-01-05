@@ -57,11 +57,13 @@ def get_notes_by_user(
 
 def get_recent_notes_by_user(db: Session, user_id: UUID) -> List[models.Note]:
     """Get notes for a user that were created or updated in the last 24 hours."""
+    twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    
     query = db.query(models.Note).filter(
         models.Note.user_id == user_id,
         or_(
-            models.Note.created_at >= func.now() - timedelta(days=1),
-            models.Note.updated_at >= func.now() - timedelta(days=1)
+            models.Note.created_at >= twenty_four_hours_ago,
+            models.Note.updated_at >= twenty_four_hours_ago
         )
     )
     
