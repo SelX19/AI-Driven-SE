@@ -1,5 +1,3 @@
-// Sticky note card component
-
 import { useNavigate } from 'react-router-dom';
 import FavoriteIcon from './FavoriteIcon';
 
@@ -11,7 +9,13 @@ const NOTE_COLORS = [
     { bg: '#e9d5ff', light: '#f3e8ff' }, // purple
 ];
 
-export default function NoteCard({ note, onToggleFavorite }) {
+export default function NoteCard({
+    note,
+    onToggleFavorite,
+    selectionMode,
+    isSelected,
+    onSelectNote,
+}) {
     const navigate = useNavigate();
 
     // Deterministic color based on note ID
@@ -19,6 +23,7 @@ export default function NoteCard({ note, onToggleFavorite }) {
     const colors = NOTE_COLORS[colorIndex];
 
     const truncateContent = (text, maxLength = 120) => {
+        if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
     };
@@ -37,19 +42,39 @@ export default function NoteCard({ note, onToggleFavorite }) {
         onToggleFavorite(note.id, !note.is_favorite);
     };
 
+    const handleCardClick = () => {
+        if (selectionMode) {
+            onSelectNote(note.id);
+        }
+        else {
+            navigate(`/note/${note.id}`);
+        }
+    };
+
     return (
         <div
-            onClick={() => navigate(`/note/${note.id}`)}
-            className="sticky-note cursor-pointer transform hover:scale-105 transition-transform duration-200 h-64 flex flex-col"
+            onClick={handleCardClick}
+            className={`sticky-note cursor-pointer transform hover:scale-105 transition-transform duration-200 h-64 flex flex-col relative ${selectionMode && isSelected ? 'ring-2 ring-blue-500' : ''
+                }`}
             style={{
                 '--note-color': colors.bg,
                 '--note-color-light': colors.light,
             }}
         >
-            <div className="absolute top-2 right-2 z-10">
+            {selectionMode && (
+                <div className="absolute top-2 left-2 z-10">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onSelectNote(note.id)}
+                        className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                </div>
+            )}
+            <div className="absolute top-2 right-2 z-10 flex items-center space-x-2">
                 <FavoriteIcon isFavorite={note.is_favorite} onClick={handleFavoriteClick} />
             </div>
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col pt-8">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2">
                     {note.title}
                 </h3>

@@ -1,12 +1,10 @@
-// Notes grid with tabs
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import NoteCard from '../components/NoteCard';
 import { useNotification } from '../context/NotificationContext';
-import Sidebar from '../components/Sidebar'; // Import Sidebar component
+import Sidebar from '../components/Sidebar';
 
 const TABS = [
     { id: 'all', label: 'All', status: null },
@@ -26,14 +24,16 @@ export default function Dashboard() {
     const [newNoteTags, setNewNoteTags] = useState('');
     const [creating, setCreating] = useState(false);
     const { showError, showSuccess } = useNotification();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar
-    const [filterType, setFilterType] = useState('all'); // New state for filter type
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [filterType, setFilterType] = useState('all');
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedNoteIds, setSelectedNoteIds] = useState([]);
 
     const currentTabStatus = TABS.find(tab => tab.id === activeTab)?.status;
 
     useEffect(() => {
         loadNotes();
-    }, [activeTab, filterType]); // Add filterType to dependency array
+    }, [activeTab, filterType]);
 
     const loadNotes = async () => {
         setLoading(true);
@@ -113,9 +113,43 @@ export default function Dashboard() {
         }
     };
 
+    const handleToggleSelectionMode = () => {
+        setSelectionMode(!selectionMode);
+        setSelectedNoteIds([]);
+    };
+
+    const handleSelectNote = (noteId) => {
+        setSelectedNoteIds(prevIds =>
+            prevIds.includes(noteId)
+                ? prevIds.filter(id => id !== noteId)
+                : [...prevIds, noteId]
+        );
+    };
+
+    const handleBatchDelete = async () => {
+        if (selectedNoteIds.length === 0) return;
+
+        if (window.confirm(`You are about to perform a permanent delete on the selected notes, are you sure you want to do this?`)) {
+            try {
+                await api.deleteNotesBatch(user.id, selectedNoteIds);
+                showSuccess(`${selectedNoteIds.length} notes deleted successfully!`);
+                setSelectionMode(false);
+                setSelectedNoteIds([]);
+                loadNotes();
+            } catch (error) {
+                console.error('Failed to delete notes:', error);
+                showError('Failed to delete notes.');
+            }
+        }
+    };
+
+    const handleCancelSelection = () => {
+        setSelectionMode(false);
+        setSelectedNoteIds([]);
+    };
+
     return (
         <div className="min-h-screen">
-            {/* Sidebar */}
             <Sidebar
                 isOpen={isSidebarOpen}
                 toggleSidebar={toggleSidebar}
@@ -123,7 +157,6 @@ export default function Dashboard() {
             />
 
             <div className="flex-1 flex flex-col">
-                {/* Header */}
                 <header className="bg-white shadow-sm border-b border-gray-200">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                         <div className="flex items-center justify-between">
@@ -151,29 +184,58 @@ export default function Dashboard() {
                     </div>
                 </header>
 
-                {/* Tabs - only show if not in favorites or recent filter */}
-                {filterType !== 'favorites' && filterType !== 'recent' && (
-                    <div className="bg-white border-b border-gray-200">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <nav className="flex space-x-8" aria-label="Tabs">
-                                {TABS.map((tab) => (
+                <div className="bg-white border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center">
+                            {filterType !== 'favorites' && filterType !== 'recent' ? (
+                                <nav className="flex space-x-8" aria-label="Tabs">
+                                    {TABS.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`py-4 px-1 border-b-2 font-medium text-sm transition ${activeTab === tab.id
+                                                ? 'border-blue-500 text-blue-600'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </nav>
+                            ) : <div></div>}
+                            <div className="flex items-center">
+                                {selectionMode ? (
+                                    <div className="flex items-center space-x-4">
+                                        <button
+                                            onClick={handleBatchDelete}
+                                            disabled={selectedNoteIds.length === 0}
+                                            className="text-gray-500 hover:text-red-600 disabled:text-gray-300 disabled:cursor-not-allowed"
+                                            aria-label="Delete selected notes"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={handleCancelSelection}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ) : (
                                     <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition ${activeTab === tab.id
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                            }`}
+                                        onClick={handleToggleSelectionMode}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
                                     >
-                                        {tab.label}
+                                        Select Notes
                                     </button>
-                                ))}
-                            </nav>
+                                )}
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {/* Main Content */}
                 <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     {loading ? (
                         <div className="text-center py-12">
@@ -190,10 +252,10 @@ export default function Dashboard() {
                                 {filterType === 'favorites'
                                     ? "You haven't favorited any notes yet."
                                     : filterType === 'recent'
-                                    ? "You don't have any notes that were created or updated today."
-                                    : activeTab === 'archived'
-                                        ? "You haven't archived any notes yet."
-                                        : "Create your first note to get started!"}
+                                        ? "You don't have any notes that were created or updated today."
+                                        : activeTab === 'archived'
+                                            ? "You haven't archived any notes yet."
+                                            : "Create your first note to get started!"}
                             </p>
                             {activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
                                 <button
@@ -207,14 +269,20 @@ export default function Dashboard() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {notes.map((note) => (
-                                <NoteCard key={note.id} note={note} onToggleFavorite={handleToggleFavorite} />
+                                <NoteCard
+                                    key={note.id}
+                                    note={note}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    selectionMode={selectionMode}
+                                    isSelected={selectedNoteIds.includes(note.id)}
+                                    onSelectNote={handleSelectNote}
+                                />
                             ))}
                         </div>
                     )}
                 </main>
 
-                {/* Floating Action Button */}
-                {activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
+                {!selectionMode && activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
                     <button
                         onClick={() => setShowCreateModal(true)}
                         className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-16 h-16 rounded-full shadow-lg hover:shadow-xl transition flex items-center justify-center text-3xl"
@@ -224,7 +292,6 @@ export default function Dashboard() {
                     </button>
                 )}
 
-                {/* Create Note Modal */}
                 {showCreateModal && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">

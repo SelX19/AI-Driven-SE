@@ -126,13 +126,104 @@ def update_note_status(
     return db_note
 
 
-def delete_note_permanently(db: Session, note_id: UUID, user_id: UUID) -> bool:
-    """Permanently delete a note (not used in MVP, but available for future)"""
-    db_note = get_note_by_id(db, note_id, user_id)
+
+
+
+def delete_notes_by_ids(db: Session, note_ids: List[UUID], user_id: UUID) -> int:
+
+
+    """Permanently delete multiple notes by their IDs for a specific user."""
+
+
     
-    if not db_note:
-        return False
-    
-    db.delete(db_note)
+
+
+    # Query for the notes to be deleted to ensure they belong to the user
+
+
+    notes_to_delete = db.query(models.Note).filter(
+
+
+        models.Note.id.in_(note_ids),
+
+
+        models.Note.user_id == user_id
+
+
+    ).all()
+
+
+
+
+
+    if not notes_to_delete:
+
+
+        return 0
+
+
+
+
+
+    # Get the count before deleting
+
+
+    delete_count = len(notes_to_delete)
+
+
+
+
+
+    for note in notes_to_delete:
+
+
+        db.delete(note)
+
+
+
+
+
     db.commit()
+
+
+    
+
+
+    return delete_count
+
+
+
+
+
+
+
+
+def delete_note_permanently(db: Session, note_id: UUID, user_id: UUID) -> bool:
+
+
+    """Permanently delete a note (not used in MVP, but available for future)"""
+
+
+    db_note = get_note_by_id(db, note_id, user_id)
+
+
+    
+
+
+    if not db_note:
+
+
+        return False
+
+
+    
+
+
+    db.delete(db_note)
+
+
+    db.commit()
+
+
     return True
+
