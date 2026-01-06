@@ -177,20 +177,188 @@ def get_favorite_notes(
     return notes
 
 
+
+
+
 @router.get("/recent/", response_model=List[schemas.NoteResponse])
+
+
 def get_recent_notes(
+
+
     user_id: UUID = Query(..., description="User ID"),
+
+
     db: Session = Depends(get_db)
+
+
 ):
+
+
     """
+
+
     Get all recent notes for a user (created or updated in the last 24 hours).
+
+
     """
+
+
     user = crud.get_user_by_id(db, user_id)
+
+
     if not user:
+
+
         raise HTTPException(
+
+
             status_code=status.HTTP_404_NOT_FOUND,
+
+
             detail="User not found"
+
+
         )
+
+
     
+
+
     notes = crud.get_recent_notes_by_user(db, user_id=user_id)
+
+
     return notes
+
+
+
+
+
+
+
+
+@router.delete("/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
+
+
+def delete_note_permanently(
+
+
+    note_id: UUID,
+
+
+    user_id: UUID = Query(..., description="User ID"),
+
+
+    db: Session = Depends(get_db)
+
+
+):
+
+
+    """
+
+
+    Permanently delete a single note.
+
+
+    """
+
+
+    success = crud.delete_note_permanently(db, note_id=note_id, user_id=user_id)
+
+
+    
+
+
+    if not success:
+
+
+        raise HTTPException(
+
+
+            status_code=status.HTTP_404_NOT_FOUND,
+
+
+            detail="Note not found"
+
+
+        )
+
+
+    
+
+
+    return
+
+
+
+
+
+
+
+
+@router.delete("/batch/", status_code=status.HTTP_200_OK)
+
+
+def delete_notes_batch(
+
+
+    user_id: UUID,
+
+
+    note_ids: List[UUID],
+
+
+    db: Session = Depends(get_db)
+
+
+):
+
+
+    """
+
+
+    Permanently delete a batch of notes.
+
+
+    """
+
+
+    
+
+
+    # Verify user exists
+
+
+    user = crud.get_user_by_id(db, user_id)
+
+
+    if not user:
+
+
+        raise HTTPException(
+
+
+            status_code=status.HTTP_404_NOT_FOUND,
+
+
+            detail="User not found"
+
+
+        )
+
+
+    
+
+
+    # Delete the notes
+
+
+    deleted_count = crud.delete_notes_by_ids(db, note_ids=note_ids, user_id=user_id)
+
+
+    
+
+
+    return {"detail": f"Successfully deleted {deleted_count} notes."}
+
