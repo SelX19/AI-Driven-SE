@@ -126,19 +126,6 @@ export default function Dashboard() {
         );
     };
 
-    const handleIndividualDelete = async (noteId) => {
-        if (window.confirm('Are you sure you want to permanently delete this note?')) {
-            try {
-                await api.deleteNote(noteId, user.id);
-                showSuccess('Note deleted successfully!');
-                loadNotes();
-            } catch (error) {
-                console.error('Failed to delete note:', error);
-                showError('Failed to delete note.');
-            }
-        }
-    };
-
     const handleBatchDelete = async () => {
         if (selectedNoteIds.length === 0) return;
 
@@ -289,7 +276,6 @@ export default function Dashboard() {
                                     selectionMode={selectionMode}
                                     isSelected={selectedNoteIds.includes(note.id)}
                                     onSelectNote={handleSelectNote}
-                                    onDeleteNote={handleIndividualDelete}
                                 />
                             ))}
                         </div>
