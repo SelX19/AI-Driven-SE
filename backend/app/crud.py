@@ -79,6 +79,7 @@ def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.
         content=note.content,
         tags=note.tags,
         is_favorite=note.is_favorite,
+        color=note.color,
         status="active"
     )
     db.add(db_note)
