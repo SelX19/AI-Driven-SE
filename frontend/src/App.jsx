@@ -22,6 +22,14 @@ function App() {
                         }
                     />
                     <Route
+                        path="/tagged"
+                        element={
+                            <ProtectedRoute>
+                                <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
                         path="/note/:id"
                         element={
                             <ProtectedRoute>

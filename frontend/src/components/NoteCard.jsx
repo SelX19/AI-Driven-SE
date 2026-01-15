@@ -19,8 +19,7 @@ export default function NoteCard({
     const navigate = useNavigate();
 
     // Deterministic color based on note ID
-    const colorIndex = note.id.charCodeAt(0) % NOTE_COLORS.length;
-    const colors = NOTE_COLORS[colorIndex];
+    const colors = note.color ? { bg: note.color, light: note.color } : NOTE_COLORS[note.id.charCodeAt(0) % NOTE_COLORS.length];
 
     const truncateContent = (text, maxLength = 120) => {
         if (!text) return '';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import NoteCard from '../components/NoteCard';
 import { useNotification } from '../context/NotificationContext';
@@ -15,6 +15,9 @@ const TABS = [
 export default function Dashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+    const isTaggedMode = location.pathname === '/tagged';
+
     const [activeTab, setActiveTab] = useState('all');
     const [notes, setNotes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,29 +25,73 @@ export default function Dashboard() {
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
     const [newNoteTags, setNewNoteTags] = useState('');
+    const [selectedColor, setSelectedColor] = useState(null);
     const [creating, setCreating] = useState(false);
     const { showError, showSuccess } = useNotification();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [filterType, setFilterType] = useState('all');
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+    const [tags, setTags] = useState([]);
 
+    const noteColors = [
+        { name: 'note-yellow', class: 'bg-note-yellow', hex: '#fef3c7' },
+        { name: 'note-pink', class: 'bg-note-pink', hex: '#fce7f3' },
+        { name: 'note-blue', class: 'bg-note-blue', hex: '#dbeafe' },
+        { name: 'note-green', class: 'bg-note-green', hex: '#d1fae5' },
+        { name: 'note-purple', class: 'bg-note-purple', hex: '#e9d5ff' },
+    ];
+
+    const taggedTabs = [{ id: 'all', label: 'All' }, ...tags.map(tag => ({ id: tag, label: tag }))];
+    const tabsToRender = isTaggedMode ? taggedTabs : TABS;
     const currentTabStatus = TABS.find(tab => tab.id === activeTab)?.status;
 
     useEffect(() => {
+        if (isTaggedMode) {
+            const fetchTags = async () => {
+                try {
+                    const fetchedTags = await api.getTags(user.id);
+                    setTags(fetchedTags);
+                } catch (error) {
+                    console.error('Failed to load tags:', error);
+                    showError('Failed to load tags');
+                }
+            };
+            fetchTags();
+        }
+    }, [isTaggedMode, user.id]);
+
+    useEffect(() => {
+        // Reset tabs and filters when switching modes
+        setActiveTab('all');
+        setFilterType('all');
+    }, [isTaggedMode]);
+
+    useEffect(() => {
         loadNotes();
-    }, [activeTab, filterType]);
+    }, [activeTab, filterType, isTaggedMode, tags]); // added tags to dependencies
 
     const loadNotes = async () => {
         setLoading(true);
         try {
             let data;
-            if (filterType === 'favorites') {
-                data = await api.getFavoriteNotes(user.id);
-            } else if (filterType === 'recent') {
-                data = await api.getRecentNotes(user.id);
+            if (isTaggedMode) {
+                const tag = activeTab === 'all' ? null : activeTab;
+                if (tag) {
+                    data = await api.getNotes(user.id, null, tag);
+                } else {
+                    // for 'all' tagged notes, fetch all and filter client-side
+                    const allNotes = await api.getNotes(user.id);
+                    data = allNotes.filter(note => note.tags && note.tags.length > 0);
+                }
             } else {
-                data = await api.getNotes(user.id, currentTabStatus);
+                if (filterType === 'favorites') {
+                    data = await api.getFavoriteNotes(user.id);
+                } else if (filterType === 'recent') {
+                    data = await api.getRecentNotes(user.id);
+                } else {
+                    data = await api.getNotes(user.id, currentTabStatus);
+                }
             }
             setNotes(data);
         } catch (error) {
@@ -65,10 +112,12 @@ export default function Dashboard() {
                 title: newNoteTitle,
                 content: newNoteContent,
                 tags: newNoteTags,
+                color: selectedColor,
             });
             setNewNoteTitle('');
             setNewNoteContent('');
             setNewNoteTags('');
+            setSelectedColor(null);
             setShowCreateModal(false);
             loadNotes();
             showSuccess('Note created successfully!');
@@ -107,6 +156,9 @@ export default function Dashboard() {
     };
 
     const handleSelectFilter = (filter) => {
+        if (isTaggedMode) {
+            navigate('/dashboard'); // or do nothing
+        }
         setFilterType(filter);
         if (filter === 'favorites' || filter === 'recent') {
             setActiveTab('all');
@@ -170,7 +222,7 @@ export default function Dashboard() {
                                     </svg>
                                 </button>
                                 <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">📝 My Notes</h1>
+                                    <h1 className="text-2xl font-bold text-gray-900">📝 {isTaggedMode ? 'Tagged Notes' : 'My Notes'}</h1>
                                     <p className="text-sm text-gray-600 mt-1">{user.email}</p>
                                 </div>
                             </div>
@@ -187,9 +239,9 @@ export default function Dashboard() {
                 <div className="bg-white border-b border-gray-200">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center">
-                            {filterType !== 'favorites' && filterType !== 'recent' ? (
+                            {(isTaggedMode || (filterType !== 'favorites' && filterType !== 'recent')) ? (
                                 <nav className="flex space-x-8" aria-label="Tabs">
-                                    {TABS.map((tab) => (
+                                    {tabsToRender.map((tab) => (
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveTab(tab.id)}
@@ -246,16 +298,18 @@ export default function Dashboard() {
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">📝</div>
                             <h3 className="text-xl font-medium text-gray-900 mb-2">
-                                No notes yet
+                                {isTaggedMode ? "No tagged notes found" : "No notes yet"}
                             </h3>
                             <p className="text-gray-600 mb-6">
-                                {filterType === 'favorites'
-                                    ? "You haven't favorited any notes yet."
-                                    : filterType === 'recent'
-                                        ? "You don't have any notes that were created or updated today."
-                                        : activeTab === 'archived'
-                                            ? "You haven't archived any notes yet."
-                                            : "Create your first note to get started!"}
+                                {isTaggedMode
+                                    ? (activeTab === 'all' ? "You don't have any notes with tags." : `No notes found with the tag "${activeTab}".`)
+                                    : filterType === 'favorites'
+                                        ? "You haven't favorited any notes yet."
+                                        : filterType === 'recent'
+                                            ? "You don't have any notes that were created or updated today."
+                                            : activeTab === 'archived'
+                                                ? "You haven't archived any notes yet."
+                                                : "Create your first note to get started!"}
                             </p>
                             {activeTab !== 'archived' && filterType !== 'favorites' && filterType !== 'recent' && (
                                 <button
@@ -349,6 +403,23 @@ export default function Dashboard() {
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                         placeholder="e.g., work, personal, important"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Color
+                                    </label>
+                                    <div className="flex space-x-2">
+                                        {noteColors.map((color) => (
+                                            <button
+                                                key={color.name}
+                                                type="button"
+                                                className={`w-8 h-8 rounded-full border-2 ${color.class} ${selectedColor === color.hex ? 'border-blue-500' : 'border-gray-300'}`}
+                                                onClick={() => setSelectedColor(color.hex)}
+                                                aria-label={`Select ${color.name} color`}
+                                            ></button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="flex space-x-3">

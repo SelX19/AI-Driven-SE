@@ -14,6 +14,7 @@ router = APIRouter(prefix="/notes", tags=["notes"])
 def get_notes(
     user_id: UUID = Query(..., description="User ID"),
     status: Optional[str] = Query(None, description="Filter by status: active or archived"),
+    tag: Optional[str] = Query(None, description="Filter by tag"),
     db: Session = Depends(get_db)
 ):
     """
@@ -35,8 +36,28 @@ def get_notes(
             detail="Status must be 'active' or 'archived'"
         )
     
-    notes = crud.get_notes_by_user(db, user_id=user_id, status=status)
+    notes = crud.get_notes_by_user(db, user_id=user_id, status=status, tag=tag)
     return notes
+
+
+@router.get("/tags", response_model=List[str])
+def get_tags(
+    user_id: UUID = Query(..., description="User ID"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all unique tags for a user.
+    """
+    # Verify user exists
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    tags = crud.get_all_tags(db, user_id=user_id)
+    return tags
 
 
 @router.get("/{note_id}", response_model=schemas.NoteResponse)

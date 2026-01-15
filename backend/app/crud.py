@@ -41,9 +41,10 @@ def get_notes_by_user(
     db: Session, 
     user_id: UUID, 
     status: Optional[str] = None,
-    is_favorite: Optional[bool] = None
+    is_favorite: Optional[bool] = None,
+    tag: Optional[str] = None
 ) -> List[models.Note]:
-    """Get all notes for a user, optionally filtered by status and favorite"""
+    """Get all notes for a user, optionally filtered by status, favorite, and tag"""
     query = db.query(models.Note).filter(models.Note.user_id == user_id)
     
     if status:
@@ -51,8 +52,31 @@ def get_notes_by_user(
     
     if is_favorite is not None:
         query = query.filter(models.Note.is_favorite == is_favorite)
+
+    if tag:
+        # This approach is not perfect for performance on large datasets,
+        # but it's a solid approach for comma-separated strings without full-text search capabilities.
+        query = query.filter(func.concat(',', models.Note.tags, ',').like(f'%,{tag},%'))
     
     return query.order_by(desc(models.Note.created_at)).all()
+
+
+def get_all_tags(db: Session, user_id: UUID) -> List[str]:
+    """Get all unique tags for a user."""
+    query = db.query(models.Note.tags).filter(
+        models.Note.user_id == user_id, 
+        models.Note.tags.isnot(None), 
+        models.Note.tags != ''
+    ).distinct()
+    
+    all_tags_strings = [row[0] for row in query.all()]
+    unique_tags = set()
+    
+    for tags_string in all_tags_strings:
+        tags = [t.strip() for t in tags_string.split(',') if t.strip()]
+        unique_tags.update(tags)
+        
+    return sorted(list(unique_tags))
 
 
 def get_recent_notes_by_user(db: Session, user_id: UUID) -> List[models.Note]:
@@ -73,12 +97,20 @@ def get_recent_notes_by_user(db: Session, user_id: UUID) -> List[models.Note]:
 
 def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.Note:
     """Create a new note"""
+    
+    # Normalize tags
+    normalized_tags = ""
+    if note.tags:
+        tags_list = [t.strip() for t in note.tags.split(',') if t.strip()]
+        normalized_tags = ",".join(tags_list)
+
     db_note = models.Note(
         user_id=user_id,
         title=note.title,
         content=note.content,
-        tags=note.tags,
+        tags=normalized_tags,
         is_favorite=note.is_favorite,
+        color=note.color,
         status="active"
     )
     db.add(db_note)
@@ -100,6 +132,12 @@ def update_note(
         return None
     
     update_data = note_update.model_dump(exclude_unset=True)
+
+    # Normalize tags if they are being updated
+    if 'tags' in update_data and update_data['tags'] is not None:
+        tags_list = [t.strip() for t in update_data['tags'].split(',') if t.strip()]
+        update_data['tags'] = ",".join(tags_list)
+
     for key, value in update_data.items():
         setattr(db_note, key, value)
     
