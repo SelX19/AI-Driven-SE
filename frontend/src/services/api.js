@@ -35,10 +35,13 @@ class ApiService {
     }
 
     // Notes endpoints
-    async getNotes(userId, status = null) {
+    async getNotes(userId, status = null, tag = null) {
         const params = new URLSearchParams({ user_id: userId });
         if (status) {
             params.append('status', status);
+        }
+        if (tag) {
+            params.append('tag', tag);
         }
 
         const response = await fetch(`${API_BASE_URL}/notes/?${params}`);
@@ -56,6 +59,17 @@ class ApiService {
 
         if (!response.ok) {
             throw new Error('Failed to fetch note');
+        }
+
+        return response.json();
+    }
+
+    async getTags(userId) {
+        const params = new URLSearchParams({ user_id: userId });
+        const response = await fetch(`${API_BASE_URL}/notes/tags?${params}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch tags');
         }
 
         return response.json();

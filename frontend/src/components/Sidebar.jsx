@@ -99,6 +99,16 @@ const Sidebar = ({ isOpen, toggleSidebar, onSelectFilter }) => {
             </svg>
             Recent Notes
           </button>
+          <NavLink
+            to="/tagged"
+            onClick={toggleSidebar}
+            className="w-full text-left flex items-center px-4 py-2 mt-1 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5a.997.997 0 01.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+            </svg>
+            Tagged Notes
+          </NavLink>
         </nav>
       </div>
     </>
