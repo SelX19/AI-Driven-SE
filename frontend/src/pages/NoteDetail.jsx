@@ -16,7 +16,16 @@ export default function NoteDetail() {
     const [editedTitle, setEditedTitle] = useState('');
     const [editedContent, setEditedContent] = useState('');
     const [editedTags, setEditedTags] = useState('');
+    const [editedColor, setEditedColor] = useState(null); // To store the hex code of the selected color
     const [saving, setSaving] = useState(false);
+
+    const noteColors = [
+        { name: 'note-yellow', class: 'bg-note-yellow', hex: '#fef3c7' },
+        { name: 'note-pink', class: 'bg-note-pink', hex: '#fce7f3' },
+        { name: 'note-blue', class: 'bg-note-blue', hex: '#dbeafe' },
+        { name: 'note-green', class: 'bg-note-green', hex: '#d1fae5' },
+        { name: 'note-purple', class: 'bg-note-purple', hex: '#e9d5ff' },
+    ];
 
     useEffect(() => {
         loadNote();
@@ -30,6 +39,7 @@ export default function NoteDetail() {
             setEditedTitle(data.title);
             setEditedContent(data.content);
             setEditedTags(data.tags || '');
+            setEditedColor(data.color);
         } catch (error) {
             console.error('Failed to load note:', error);
             showError('Failed to load note');
@@ -51,6 +61,7 @@ export default function NoteDetail() {
                 title: editedTitle,
                 content: editedContent,
                 tags: editedTags,
+                color: editedColor,
             });
             setNote(updated);
             setEditing(false);
@@ -108,6 +119,7 @@ export default function NoteDetail() {
         setEditedTitle(note.title);
         setEditedContent(note.content);
         setEditedTags(note.tags || '');
+        setEditedColor(note.color);
         setEditing(false);
     };
 
@@ -257,24 +269,42 @@ export default function NoteDetail() {
                                 className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                 placeholder="e.g., work, personal, important"
                             />
-                        </div>
-                    ) : (
-                        note.tags && (
-                            <div className="mb-8">
-                                <div className="flex flex-wrap gap-2">
-                                    {note.tags.split(',').map((tag) => (
-                                        <span
-                                            key={tag}
-                                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
-                                        >
-                                            {tag.trim()}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )
-                    )}
-
+                                                        </div>
+                                                    ) : (
+                                                        note.tags && (
+                                                            <div className="mb-8">
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {note.tags.split(',').map((tag) => (
+                                                                        <span
+                                                                            key={tag}
+                                                                            className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full text-sm"
+                                                                        >
+                                                                            {tag.trim()}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                        
+                                                    {editing && (
+                                                        <div className="mb-6">
+                                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                Color
+                                                            </label>
+                                                            <div className="flex space-x-2">
+                                                                {noteColors.map((color) => (
+                                                                    <button
+                                                                        key={color.name}
+                                                                        type="button"
+                                                                        className={`w-8 h-8 rounded-full border-2 ${color.class} ${editedColor === color.hex ? 'border-blue-500' : 'border-gray-300'}`}
+                                                                        onClick={() => setEditedColor(color.hex)}
+                                                                        aria-label={`Select ${color.name} color`}
+                                                                    ></button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                     {/* Metadata */}
                     <div className="pt-6 border-t border-gray-200 text-sm text-gray-600 space-y-2">
                         <div className="flex justify-between">
