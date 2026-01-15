@@ -27,6 +27,7 @@ class NoteCreate(BaseModel):
     content: str = Field(default="")
     tags: str = Field(default="")
     is_favorite: bool = False
+    color: str | None = None
 
 
 class NoteUpdate(BaseModel):
@@ -34,6 +35,7 @@ class NoteUpdate(BaseModel):
     content: str | None = None
     tags: str | None = None
     is_favorite: bool | None = None
+    color: str | None = None
 
 
 class NoteStatusUpdate(BaseModel):
@@ -52,6 +54,7 @@ class NoteResponse(BaseModel):
     tags: str
     status: Literal["active", "archived"]
     is_favorite: bool
+    color: str | None = None
     created_at: datetime
     updated_at: datetime
     

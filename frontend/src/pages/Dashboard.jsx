@@ -22,12 +22,21 @@ export default function Dashboard() {
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
     const [newNoteTags, setNewNoteTags] = useState('');
+    const [selectedColor, setSelectedColor] = useState(null); // To store the hex code of the selected color
     const [creating, setCreating] = useState(false);
     const { showError, showSuccess } = useNotification();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [filterType, setFilterType] = useState('all');
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+
+    const noteColors = [
+        { name: 'note-yellow', class: 'bg-note-yellow', hex: '#fef3c7' },
+        { name: 'note-pink', class: 'bg-note-pink', hex: '#fce7f3' },
+        { name: 'note-blue', class: 'bg-note-blue', hex: '#dbeafe' },
+        { name: 'note-green', class: 'bg-note-green', hex: '#d1fae5' },
+        { name: 'note-purple', class: 'bg-note-purple', hex: '#e9d5ff' },
+    ];
 
     const currentTabStatus = TABS.find(tab => tab.id === activeTab)?.status;
 
@@ -65,10 +74,12 @@ export default function Dashboard() {
                 title: newNoteTitle,
                 content: newNoteContent,
                 tags: newNoteTags,
+                color: selectedColor,
             });
             setNewNoteTitle('');
             setNewNoteContent('');
             setNewNoteTags('');
+            setSelectedColor(null); // Reset selected color
             setShowCreateModal(false);
             loadNotes();
             showSuccess('Note created successfully!');
@@ -349,6 +360,23 @@ export default function Dashboard() {
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                         placeholder="e.g., work, personal, important"
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Color
+                                    </label>
+                                    <div className="flex space-x-2">
+                                        {noteColors.map((color) => (
+                                            <button
+                                                key={color.name}
+                                                type="button"
+                                                className={`w-8 h-8 rounded-full border-2 ${color.class} ${selectedColor === color.hex ? 'border-blue-500' : 'border-gray-300'}`}
+                                                onClick={() => setSelectedColor(color.hex)}
+                                                aria-label={`Select ${color.name} color`}
+                                            ></button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="flex space-x-3">
