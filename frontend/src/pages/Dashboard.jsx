@@ -22,6 +22,9 @@ export default function Dashboard() {
     const [newNoteTitle, setNewNoteTitle] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
     const [newNoteTags, setNewNoteTags] = useState('');
+    const [newNoteCategory, setNewNoteCategory] = useState('');
+    const [availableCategories, setAvailableCategories] = useState([]);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [creating, setCreating] = useState(false);
     const { showError, showSuccess } = useNotification();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,6 +37,21 @@ export default function Dashboard() {
     useEffect(() => {
         loadNotes();
     }, [activeTab, filterType]);
+
+    useEffect(() => {
+        if (showCreateModal && user?.id) {
+            const fetchCategories = async () => {
+                try {
+                    const fetchedCategories = await api.getCategories(user.id);
+                    setAvailableCategories(fetchedCategories);
+                } catch (error) {
+                    console.error('Failed to fetch categories:', error);
+                    showError('Failed to load categories');
+                }
+            };
+            fetchCategories();
+        }
+    }, [showCreateModal, user?.id]);
 
     const loadNotes = async () => {
         setLoading(true);
@@ -65,10 +83,12 @@ export default function Dashboard() {
                 title: newNoteTitle,
                 content: newNoteContent,
                 tags: newNoteTags,
+                category: newNoteCategory,
             });
             setNewNoteTitle('');
             setNewNoteContent('');
             setNewNoteTags('');
+            setNewNoteCategory('');
             setShowCreateModal(false);
             loadNotes();
             showSuccess('Note created successfully!');
@@ -146,6 +166,11 @@ export default function Dashboard() {
     const handleCancelSelection = () => {
         setSelectionMode(false);
         setSelectedNoteIds([]);
+    };
+
+    const handleCategorySelect = (category) => {
+        setNewNoteCategory(category);
+        setShowCategoryDropdown(false);
     };
 
     return (
@@ -349,6 +374,36 @@ export default function Dashboard() {
                                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                         placeholder="e.g., work, personal, important"
                                     />
+                                </div>
+
+                                {/* New Category Field */}
+                                <div className="relative">
+                                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Category
+                                    </label>
+                                    <input
+                                        id="category"
+                                        type="text"
+                                        value={newNoteCategory}
+                                        onChange={(e) => setNewNoteCategory(e.target.value)}
+                                        onFocus={() => setShowCategoryDropdown(true)}
+                                        onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 100)} // Delay to allow click on dropdown item
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                        placeholder="Enter or select a category"
+                                    />
+                                    {showCategoryDropdown && availableCategories.length > 0 && (
+                                        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                            {availableCategories.map((category) => (
+                                                <li
+                                                    key={category}
+                                                    onMouseDown={() => handleCategorySelect(category)} // Use onMouseDown to prevent onBlur from firing first
+                                                    className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                                                >
+                                                    {category}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
 
                                 <div className="flex space-x-3">

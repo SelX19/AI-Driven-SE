@@ -63,6 +63,7 @@ class Note(Base):
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False, default="")
     tags = Column(Text, nullable=False, default="")
+    category = Column(String, nullable=True)
     status = Column(String(20), nullable=False, default="active")
     is_favorite = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

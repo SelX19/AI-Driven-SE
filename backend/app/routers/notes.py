@@ -159,22 +159,234 @@ def toggle_favorite_note(
 
 
 @router.get("/favorites/", response_model=List[schemas.NoteResponse])
+
+
+
+
+
 def get_favorite_notes(
+
+
+
+
+
     user_id: UUID = Query(..., description="User ID"),
+
+
+
+
+
     db: Session = Depends(get_db)
+
+
+
+
+
 ):
+
+
+
+
+
     """
+
+
+
+
+
     Get all favorite notes for a user.
+
+
+
+
+
     """
+
+
+
+
+
     user = crud.get_user_by_id(db, user_id)
+
+
+
+
+
     if not user:
+
+
+
+
+
         raise HTTPException(
+
+
+
+
+
             status_code=status.HTTP_404_NOT_FOUND,
+
+
+
+
+
             detail="User not found"
+
+
+
+
+
         )
+
+
+
+
+
     
+
+
+
+
+
     notes = crud.get_notes_by_user(db, user_id=user_id, is_favorite=True)
+
+
+
+
+
     return notes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@router.get("/categories", response_model=List[str])
+
+
+
+
+
+def get_categories(
+
+
+
+
+
+    user_id: UUID = Query(..., description="User ID"),
+
+
+
+
+
+    db: Session = Depends(get_db)
+
+
+
+
+
+):
+
+
+
+
+
+    """
+
+
+
+
+
+    Get all unique categories for a user.
+
+
+
+
+
+    """
+
+
+
+
+
+    # Verify user exists
+
+
+
+
+
+    user = crud.get_user_by_id(db, user_id)
+
+
+
+
+
+    if not user:
+
+
+
+
+
+        raise HTTPException(
+
+
+
+
+
+            status_code=status.HTTP_404_NOT_FOUND,
+
+
+
+
+
+            detail="User not found"
+
+
+
+
+
+        )
+
+
+
+
+
+    
+
+
+
+
+
+    categories = crud.get_all_categories(db, user_id=user_id)
+
+
+
+
+
+    return categories
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
