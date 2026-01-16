@@ -78,6 +78,7 @@ def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.
         title=note.title,
         content=note.content,
         tags=note.tags,
+        category=note.category,
         is_favorite=note.is_favorite,
         status="active"
     )
@@ -85,6 +86,16 @@ def create_note(db: Session, note: schemas.NoteCreate, user_id: UUID) -> models.
     db.commit()
     db.refresh(db_note)
     return db_note
+
+
+def get_all_categories(db: Session, user_id: UUID) -> List[str]:
+    """Get all unique categories for a user"""
+    categories = db.query(models.Note.category)\
+                   .filter(models.Note.user_id == user_id, models.Note.category.isnot(None))\
+                   .group_by(models.Note.category)\
+                   .order_by(models.Note.category)\
+                   .all()
+    return [category[0] for category in categories]
 
 
 def update_note(

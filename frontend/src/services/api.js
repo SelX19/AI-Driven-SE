@@ -132,6 +132,17 @@ class ApiService {
         return response.json();
     }
 
+    async getCategories(userId) {
+        const params = new URLSearchParams({ user_id: userId });
+        const response = await fetch(`${API_BASE_URL}/notes/categories?${params}`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch categories');
+        }
+
+        return response.json();
+    }
+
     
 
         async getRecentNotes(userId) {
